@@ -15,6 +15,13 @@ public class StudioProviderImpl implements StudioProvider {
     private final StudioRepository studioRepository;
 
     @Override
+    public StudioEntity save(StudioEntity entity) {
+        return studioRepository
+                .save(StudioJpaEntity.toJpaEntity(entity))
+                .toEntity();
+    }
+
+    @Override
     public Optional<StudioEntity> findByName(String name) {
         return studioRepository
                 .findByName(name)

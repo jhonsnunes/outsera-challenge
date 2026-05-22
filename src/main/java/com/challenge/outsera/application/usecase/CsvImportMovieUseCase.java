@@ -2,13 +2,11 @@ package com.challenge.outsera.application.usecase;
 
 import com.challenge.outsera.application.provider.CsvMovieReaderProvider;
 import com.challenge.outsera.application.provider.MovieProvider;
+import com.challenge.outsera.application.provider.ProducerProvider;
+import com.challenge.outsera.application.provider.StudioProvider;
 import com.challenge.outsera.domain.movie.MovieEntity;
 import com.challenge.outsera.domain.producer.ProducerEntity;
 import com.challenge.outsera.domain.studio.StudioEntity;
-import com.challenge.outsera.infrastructure.producer.persistence.ProducerJpaEntity;
-import com.challenge.outsera.infrastructure.producer.persistence.ProducerRepository;
-import com.challenge.outsera.infrastructure.studio.persistence.StudioJpaEntity;
-import com.challenge.outsera.infrastructure.studio.persistence.StudioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +20,8 @@ import java.util.Set;
 public class CsvImportMovieUseCase {
     private final CsvMovieReaderProvider csvMovieReaderProvider;
     private final MovieProvider movieProvider;
-
-    private final StudioRepository studioRepository;
-    private final ProducerRepository producerRepository;
+    private final StudioProvider studioProvider;
+    private final ProducerProvider producerProvider;
 
     public void importMovies() {
         List<MovieEntity> movies = csvMovieReaderProvider.read();
@@ -49,12 +46,9 @@ public class CsvImportMovieUseCase {
         Set<StudioEntity> resolvedStudios = new HashSet<>();
 
         for (StudioEntity studio : studios) {
-            StudioEntity entity = studioRepository
+            StudioEntity entity = studioProvider
                     .findByName(studio.name())
-                    .orElseGet(
-                        () -> studioRepository.save(StudioJpaEntity.toJpaEntity(studio))
-                    )
-                    .toEntity();
+                    .orElseGet(() -> studioProvider.save(studio));
 
             resolvedStudios.add(entity);
         }
@@ -65,12 +59,9 @@ public class CsvImportMovieUseCase {
         Set<ProducerEntity> resolvedProducers = new HashSet<>();
 
         for (ProducerEntity producer : producers) {
-            ProducerEntity entity = producerRepository
+            ProducerEntity entity = producerProvider
                     .findByName(producer.name())
-                    .orElseGet(
-                            () -> producerRepository.save(ProducerJpaEntity.toJpaEntity(producer))
-                    )
-                    .toEntity();
+                    .orElseGet(() -> producerProvider.save(producer));
 
             resolvedProducers.add(entity);
         }

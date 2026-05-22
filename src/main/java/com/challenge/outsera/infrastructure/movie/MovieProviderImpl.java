@@ -1,6 +1,7 @@
 package com.challenge.outsera.infrastructure.movie;
 
 import com.challenge.outsera.application.provider.MovieProvider;
+import com.challenge.outsera.application.usecase.dto.ProducerWinYear;
 import com.challenge.outsera.domain.movie.MovieEntity;
 import com.challenge.outsera.infrastructure.movie.persistence.MovieJpaEntity;
 import com.challenge.outsera.infrastructure.movie.persistence.MovieRepository;
@@ -25,10 +26,7 @@ public class MovieProviderImpl implements MovieProvider {
     }
 
     @Override
-    public List<MovieEntity> findWinnerMovies() {
-        return movieRepository.findWinnerMovies()
-                .stream()
-                .map(MovieJpaEntity::toEntity)
-                .toList();
+    public List<ProducerWinYear> findProducerWinYearsByWinnerMovies() {
+        return movieRepository.findProducerWinYearsByWinnerMovies();
     }
 }

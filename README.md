@@ -82,6 +82,8 @@ O endpoint retorna:
 
 ## Como executar os testes
 
+O projeto utiliza **somente testes de integração**. Eles importam o mesmo `movielist.csv` da aplicação, chamam `GET /award-interval` e comparam a resposta com um snapshot fixo.
+
 ```bash
 ./gradlew test
 ```
@@ -90,7 +92,7 @@ O endpoint retorna:
 
 ## Sobre o arquivo movielist.csv
 
-O projeto utiliza o arquivo abaixo como fonte de dados inicial da aplicação:
+O projeto utiliza o arquivo abaixo como fonte de dados da proposta:
 
 ```text
 src/main/resources/movielist.csv
@@ -101,6 +103,27 @@ Durante a inicialização da aplicação:
 1. O arquivo CSV é lido automaticamente
 2. Os dados são convertidos para entidades do domínio
 3. Os registros são persistidos no banco H2 em memória
+
+### Alteração do arquivo e testes
+
+O conteúdo de `movielist.csv` é a **fonte de verdade** do desafio. Os testes de integração garantem que a API permanece alinhada a esse arquivo:
+
+- validam o **checksum SHA-256** do CSV (qualquer byte alterado faz o teste falhar);
+- comparam o JSON de `/award-interval` com os valores esperados em `src/test/java/com/challenge/outsera/support/MovielistProposalExpectation.java`.
+
+Se `movielist.csv` for modificado de forma que o resultado da API mude, é necessário **atualizar os testes**:
+
+1. Rodar `./gradlew test` e verificar a nova resposta de `/award-interval` (ou consultar o endpoint após `./gradlew bootRun`).
+2. Atualizar as listas `MIN` e `MAX` em `MovielistProposalExpectation.java`.
+3. Recalcular e substituir `CSV_SHA256` com o hash do arquivo atual:
+
+```bash
+sha256sum src/main/resources/movielist.csv
+```
+
+4. Executar `./gradlew test` novamente até passar.
+
+Sem essa atualização, o build falha de propósito evitando divergência entre o CSV e o comportamento documentado da API.
 
 ---
 
@@ -126,6 +149,7 @@ Exemplo:
 - O banco H2 é recriado a cada execução da aplicação
 - Producers e Studios são deduplicados automaticamente durante a importação
 - O carregamento do CSV ocorre automaticamente no startup da aplicação
+- Não altere `movielist.csv` sem atualizar `MovielistProposalExpectation` e o checksum SHA-256 nos testes
 
 ---
 
